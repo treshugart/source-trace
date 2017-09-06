@@ -1,6 +1,6 @@
 # source-trace
 
-Trace all of your dependnecies for any type of JavaScript (and supersets - TS / Flow) source files.
+Trace all of your dependencies for any type of JavaScript (and supersets - TS / Flow) source files.
 
 ## Install
 
