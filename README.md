@@ -21,7 +21,7 @@ Or in JS:
 ```js
 const sourceTrace = require('source-trace');
 
-sourceTrace('./path/to/entry/point.js');
+sourceTrace('./path/to/entry/point.js').then(console.log);
 ```
 
 ## Options
