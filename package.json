@@ -20,5 +20,5 @@
   },
   "author": "",
   "license": "ISC",
-  "bin": "./bind/index.js"
+  "bin": "./bin/index.js"
 }
