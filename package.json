@@ -1,0 +1,42 @@
+{
+  "babel": {
+    "presets": "stage-0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "jest": "^21.0.1",
+    "conartist": "^0.9.2"
+  },
+  "files": [
+    "node/"
+  ],
+  "main": "./node/index.js",
+  "scripts": {
+    "build:node": "babel --no-babelrc src --out-dir node --presets=$(pwd)/config/babel.node",
+    "test": "jest",
+    "prepublish": "npm run build:node"
+  },
+  "jest": {
+    "modulePathIgnorePatterns": [
+      "./node_modules"
+    ]
+  },
+  "name": "source-trace",
+  "version": "1.0.1",
+  "description": "Trace all of your dependencies for any type of JavaScript (and supersets - TS / Flow) source files.",
+  "dependencies": {
+    "find-root": "^1.1.0",
+    "precinct": "^3.8.0",
+    "resolve": "^1.4.0",
+    "yargs": "^8.0.2"
+  },
+  "author": {
+    "name": "Trey Shugart",
+    "email": "treshugart@gmail.com"
+  },
+  "license": "MIT",
+  "bin": "./node/bin/index.js"
+}
