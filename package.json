@@ -1,7 +1,4 @@
 {
-  "babel": {
-    "presets": "stage-0"
-  },
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-preset-env": "^1.6.0",
@@ -23,6 +20,9 @@
     "modulePathIgnorePatterns": [
       "./node_modules"
     ]
+  },
+  "babel": {
+    "presets": "stage-0"
   },
   "name": "source-trace",
   "version": "1.0.2",
