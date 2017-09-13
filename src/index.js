@@ -3,9 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const precinct = require('precinct');
 const resolve = require('resolve');
-const util = require('util');
 
-const [asyncReadFile, asyncStat] = [fs.readFile, fs.stat].map(util.promisify);
 const conf = {
   basedir: null,
   ignore: isDependency,
@@ -32,7 +30,7 @@ function isModule(file) {
   return first !== '.' && first !== '/';
 }
 
-module.exports = async function sourceTrace(file, opts) {
+module.exports = function sourceTrace(file, opts) {
   // Ignore special AMD names.
   if (isAmdName(file)) {
     return [];
@@ -67,16 +65,16 @@ module.exports = async function sourceTrace(file, opts) {
 
   opts.visited[resolved] = true;
 
-  const contents = (await asyncReadFile(resolved)).toString();
+  const contents = fs.readFileSync(resolved).toString();
   const immediateDeps = precinct(contents);
   const tracedDeps = [];
 
   for (const immediateDep of immediateDeps) {
     tracedDeps.push(
-      ...(await sourceTrace(immediateDep, {
+      ...sourceTrace(immediateDep, {
         ...opts,
         ...{ basedir: path.dirname(resolved) }
-      }))
+      })
     );
   }
 
