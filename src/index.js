@@ -7,7 +7,7 @@ const resolve = require('resolve');
 const conf = {
   basedir: null,
   ignore: isDependency,
-  extensions: ['.js', '.jsx', '.ts', '.tsx']
+  extensions: ['.js', '.json', '.jsx', '.ts', '.tsx']
 };
 
 function isAmdName(file) {
@@ -20,7 +20,7 @@ function isDependency(file, opts) {
   }
   const root = findRoot(opts.basedir);
   if (root) {
-    const { dependencies } = require(`${root}/package.json`);
+    const { dependencies } = require(`${root}/package`);
     return dependencies && !dependencies[file];
   }
 }
