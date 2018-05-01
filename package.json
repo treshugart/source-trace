@@ -25,7 +25,7 @@
     "presets": "stage-0"
   },
   "name": "source-trace",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Trace all of your dependencies for any type of JavaScript (and supersets - TS / Flow) source files.",
   "dependencies": {
     "find-root": "^1.1.0",
