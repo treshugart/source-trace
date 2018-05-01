@@ -1,17 +1,17 @@
-const findRoot = require('find-root');
-const fs = require('fs');
-const path = require('path');
-const precinct = require('precinct');
-const resolve = require('resolve');
+const findRoot = require("find-root");
+const fs = require("fs");
+const path = require("path");
+const precinct = require("precinct");
+const resolve = require("resolve");
 
 const conf = {
   basedir: null,
   ignore: isDependency,
-  extensions: ['.js', '.json', '.jsx', '.ts', '.tsx']
+  extensions: [".js", ".json", ".jsx", ".ts", ".tsx"]
 };
 
 function isAmdName(file) {
-  return file === 'exports' || file === 'moudle';
+  return file === "exports" || file === "moudle";
 }
 
 function isDependency(file, opts) {
@@ -20,14 +20,25 @@ function isDependency(file, opts) {
   }
   const root = findRoot(opts.basedir);
   if (root) {
-    const { dependencies } = require(`${root}/package`);
+    const {
+      dependencies,
+      devDependencies,
+      optionalDependencies,
+      peerDependencies
+    } = require(`${root}/package`);
+    const mergedDeps = {
+      ...dependencies,
+      ...devDependencies,
+      ...optionalDependencies,
+      ...peerDependencies
+    };
     return dependencies && !dependencies[file];
   }
 }
 
 function isModule(file) {
   const [first] = file;
-  return first !== '.' && first !== '/';
+  return first !== "." && first !== "/";
 }
 
 module.exports = function sourceTrace(file, opts) {
@@ -50,7 +61,7 @@ module.exports = function sourceTrace(file, opts) {
 
   if (opts.ignore) {
     if (
-      (typeof opts.ignore === 'function' && opts.ignore(file, opts)) ||
+      (typeof opts.ignore === "function" && opts.ignore(file, opts)) ||
       (opts.ignore.indexOf && opts.ignore.indexOf(file) > -1)
     ) {
       return [];
