@@ -6,34 +6,12 @@ const resolve = require("resolve");
 
 const conf = {
   basedir: null,
-  ignore: isDependency,
+  ignore: isModule,
   extensions: [".js", ".json", ".jsx", ".ts", ".tsx"]
 };
 
 function isAmdName(file) {
   return file === "exports" || file === "moudle";
-}
-
-function isDependency(file, opts) {
-  if (!isModule(file)) {
-    return false;
-  }
-  const root = findRoot(opts.basedir);
-  if (root) {
-    const {
-      dependencies,
-      devDependencies,
-      optionalDependencies,
-      peerDependencies
-    } = require(`${root}/package`);
-    const mergedDeps = {
-      ...dependencies,
-      ...devDependencies,
-      ...optionalDependencies,
-      ...peerDependencies
-    };
-    return dependencies && !dependencies[file];
-  }
 }
 
 function isModule(file) {

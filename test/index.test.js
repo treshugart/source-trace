@@ -1,16 +1,28 @@
-const trace = require('../src');
+const trace = require("../src");
 
-test('all dependencies', async () => {
-  const deps = await trace('./src/index.js');
-  expect(deps.length).toBeGreaterThan(1);
+function removeCwd(v) {
+  return v.replace(process.cwd(), "");
+}
+
+test("defaults (should ignore deps)", async () => {
+  const deps = await trace("./src/index.js");
+  expect(deps.map(removeCwd)).toMatchSnapshot();
 });
 
-test('local dependencies', async () => {
-  const deps = await trace('./src/index.js', {
+test("ignore everything", async () => {
+  const deps = await trace("./src/index.js", {
     ignore(file) {
-      const pkg = require('../package.json');
-      return pkg.dependencies[file];
+      return true;
     }
   });
-  expect(deps.length).toEqual(1);
+  expect(deps.map(removeCwd)).toMatchSnapshot();
+});
+
+test("ignore nothing", async () => {
+  const deps = await trace("./src/index.js", {
+    ignore(file) {
+      return false;
+    }
+  });
+  expect(deps.map(removeCwd)).toMatchSnapshot();
 });
