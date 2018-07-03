@@ -1,5 +1,5 @@
 function parsePart(part) {
-  const [path, query] = part.split("?");
+  const [path, query = null] = part.split("?");
   return { path, query };
 }
 

@@ -32,7 +32,7 @@ module.exports = function sourceTrace(file, opts) {
   opts = { ...conf, ...opts };
 
   if (!opts.basedir) {
-    opts.basedir = path.dirname(file);
+    opts.basedir = path.resolve(path.dirname(file));
     file = `./${path.basename(file)}`;
   }
 
@@ -67,13 +67,16 @@ module.exports = function sourceTrace(file, opts) {
       ...sourceTrace(immediateDep, {
         ...opts,
         ...{ basedir: path.dirname(resolved) }
-      })
+      }).map(d => ({ ...d, parent: resolved }))
     );
   }
 
   tracedDeps.push({
-    meta: meta.meta,
-    path: resolved
+    ...meta,
+    parent: null,
+    path: file,
+    resolvedFrom: opts.basedir,
+    resolvedPath: resolved
   });
 
   return tracedDeps;

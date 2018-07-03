@@ -4,7 +4,8 @@ test("data", () => {
   expect(parseMeta("module/test.js")).toEqual({
     loaders: [],
     originalPath: "module/test.js",
-    path: "module/test.js"
+    path: "module/test.js",
+    query: null
   });
   expect(
     parseMeta("!name1?data1!name2?data2=something!./path/test.js?query")
