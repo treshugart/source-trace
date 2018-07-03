@@ -24,7 +24,6 @@ function parseMeta(file) {
 }
 
 module.exports = function sourceTrace(file, opts) {
-  // Parse out meta info.
   const meta = parseMeta(file);
   file = meta.path;
 

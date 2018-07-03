@@ -1,4 +1,4 @@
-const trace = require("../src");
+const trace = require("..");
 
 function removeCwd(v) {
   return v.path.replace(process.cwd(), "");
