@@ -11,7 +11,7 @@ const conf = {
 };
 
 function isAmdName(file) {
-  return file === "exports" || file === "moudle";
+  return file === "exports" || file === "module";
 }
 
 function isModule(file) {
