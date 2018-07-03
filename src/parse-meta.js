@@ -3,9 +3,9 @@ function parsePart(part) {
   return { path, query };
 }
 
-module.exports = function parseMeta(file) {
-  const parts = file.split("!").filter(Boolean);
+module.exports = function parseMeta(originalPath) {
+  const parts = originalPath.split("!").filter(Boolean);
   const { path, query } = parsePart(parts.pop());
   const loaders = parts.map(parsePart);
-  return { loaders, path, query };
+  return { loaders, originalPath, path, query };
 };
