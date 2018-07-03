@@ -19,7 +19,15 @@ function isModule(file) {
   return first !== "." && first !== "/";
 }
 
+function parseMeta(file) {
+  return { path: file };
+}
+
 module.exports = function sourceTrace(file, opts) {
+  // Parse out meta info.
+  const meta = parseMeta(file);
+  file = meta.path;
+
   // Ignore special AMD names.
   if (isAmdName(file)) {
     return [];
@@ -67,7 +75,10 @@ module.exports = function sourceTrace(file, opts) {
     );
   }
 
-  tracedDeps.push(resolved);
+  tracedDeps.push({
+    meta: { data: meta.data, name: meta.name },
+    path: resolved
+  });
 
   return tracedDeps;
 };

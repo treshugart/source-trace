@@ -1,7 +1,7 @@
 const trace = require("../src");
 
 function removeCwd(v) {
-  return v.replace(process.cwd(), "");
+  return v.path.replace(process.cwd(), "");
 }
 
 test("defaults (should ignore deps)", async () => {
