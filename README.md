@@ -2,6 +2,10 @@
 
 Trace all of your dependencies for any type of JavaScript (and supersets - TS / Flow) source files.
 
+* Supports standard ESM, JS, TypeScript and JSX variants.
+* Supports Webpack loader-style paths: `!loader1!loader2?query!./path/to/file`.
+* Supports query strings: `./path/to/file?query`.
+
 ## Install
 
 ```sh
