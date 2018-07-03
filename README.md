@@ -25,8 +25,23 @@ Or in JS:
 ```js
 const sourceTrace = require('source-trace');
 
+// [{ path: '/absolute/path/to/entry/point.js' }]
 sourceTrace('./path/to/entry/point.js').then(console.log);
 ```
+
+## Returned data
+
+The returned data doesn't just return a path. It also returns other information about the path. For example, if you traced a source that used loaders or query strings in the file path. If a path contained stuff like `!loader!another-loader?query!path?another-query`, you'd get:
+
+```js
+{
+  loaders: [{ path: 'loader', query: 'another-loader' }],
+  path: 'path',
+  query: 'another-query'
+}
+```
+
+The purpose of parsing this extra information is, firstly, that it doesn't error if you're using paths that are valid within the JS ecosystem. Secondly, you are able to do whatever you want with that information. You may want to report what loaders are being used in your app, or even manually invoke the loaders using Webpack's [loader-runner](https://github.com/webpack/loader-runner).
 
 ## Options
 
@@ -42,6 +57,8 @@ An `array` or `function` that will tell the tracer whether or not it should igno
 
 ## Use cases
 
+### Measuring bundle size
+
 This is great for measuring your theoretical bundle size:
 
 ```js
@@ -51,7 +68,7 @@ const sourceTrace = require('source-trace');
 
 (async function () {
   const deps = await sourceTrace('./index.js');
-  const stats = deps.map(d => fs.statSync(d).size);
+  const stats = deps.map(d => fs.statSync(d.path).size);
   const sum = stats.reduce((prev, curr) => prev + curr, 0);
   console.log(bytes(sum));
 }());
