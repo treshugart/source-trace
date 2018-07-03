@@ -2,6 +2,7 @@
 
 exports[`defaults (should ignore deps) 1`] = `
 Array [
+  "/src/parse-meta.js",
   "/src/index.js",
 ]
 `;
@@ -189,6 +190,7 @@ Array [
   "/node_modules/resolve/lib/async.js",
   "/node_modules/resolve/lib/sync.js",
   "/node_modules/resolve/index.js",
+  "/src/parse-meta.js",
   "/src/index.js",
 ]
 `;

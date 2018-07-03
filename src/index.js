@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const precinct = require("precinct");
 const resolve = require("resolve");
+const parseMeta = require("./parse-meta");
 
 const conf = {
   basedir: null,
@@ -17,10 +18,6 @@ function isAmdName(file) {
 function isModule(file) {
   const [first] = file;
   return first !== "." && first !== "/";
-}
-
-function parseMeta(file) {
-  return { path: file };
 }
 
 module.exports = function sourceTrace(file, opts) {
@@ -75,7 +72,7 @@ module.exports = function sourceTrace(file, opts) {
   }
 
   tracedDeps.push({
-    meta: { data: meta.data, name: meta.name },
+    meta: meta.meta,
     path: resolved
   });
 
