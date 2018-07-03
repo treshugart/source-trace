@@ -36,8 +36,11 @@ The returned data doesn't just return a path. It also returns other information 
 ```js
 {
   loaders: [{ path: 'loader', query: 'another-loader' }],
-  path: 'path',
-  query: 'another-query'
+  originalPath: '!loader!another-loader?query!some/file.js?another-query',
+  path: 'some/file.js',
+  query: 'another-query',
+  resolvedFrom: '/path/to/cwd',
+  resolvedPath: '/path/to/cwd/some/file.js
 }
 ```
 
