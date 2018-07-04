@@ -2,19 +2,28 @@
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-preset-env": "^1.6.0",
+    "babel-preset-es2016": "^6.24.1",
+    "babel-preset-es2017": "^6.24.1",
+    "babel-preset-flow": "^6.23.0",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
-    "conartist": "^0.15.1",
-    "jest": "^21.0.1"
+    "babel-jest": "^22.0.3",
+    "jest": "^21.0.1",
+    "conartist": "^0.15.1"
   },
   "files": [
     "node/"
   ],
   "main": "./node/index.js",
   "scripts": {
-    "build:node": "babel --no-babelrc src --out-dir node --presets=$(pwd)/config/babel.node",
+    "build:node": "BABEL_ENV=node babel src --out-dir node",
     "test": "jest",
     "prepublish": "npm run build:node"
+  },
+  "jest": {
+    "modulePathIgnorePatterns": [
+      "./node_modules"
+    ]
   },
   "babel": {
     "presets": "stage-0"
