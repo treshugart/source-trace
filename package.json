@@ -20,7 +20,7 @@
     "presets": "stage-0"
   },
   "name": "source-trace",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "description": "Trace all of your dependencies for any type of JavaScript (and supersets - TS / Flow) source files.",
   "dependencies": {
     "find-root": "^1.1.0",
