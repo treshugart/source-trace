@@ -1,23 +1,15 @@
 {
-  "env": {
-    "node": {
-      "ignore": [
-        "__tests__",
-        "node_modules"
-      ],
-      "presets": [
-        [
-          "env",
-          {
-            "targets": {
-              "node": "6.0.0"
-            }
-          }
-        ],
-        "flow",
-        "react",
-        "stage-0"
-      ]
-    }
-  }
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "node": "6.0.0"
+        }
+      }
+    ],
+    "flow",
+    "react",
+    "stage-0"
+  ]
 }

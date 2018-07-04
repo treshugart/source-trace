@@ -8,7 +8,7 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "babel-jest": "^22.0.3",
-    "jest": "^21.0.1",
+    "jest": "^23.2.0",
     "conartist": "^0.15.1"
   },
   "files": [
@@ -19,14 +19,6 @@
     "build:node": "BABEL_ENV=node babel src --out-dir node",
     "test": "jest",
     "prepublish": "npm run build:node"
-  },
-  "jest": {
-    "modulePathIgnorePatterns": [
-      "./node_modules"
-    ]
-  },
-  "babel": {
-    "presets": "stage-0"
   },
   "name": "source-trace",
   "version": "4.2.1",
