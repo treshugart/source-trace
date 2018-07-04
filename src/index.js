@@ -8,7 +8,7 @@ const parseMeta = require("./parse-meta");
 const conf = {
   basedir: null,
   ignore: isModule,
-  extensions: [".esm", ".js", ".json", ".jsx", ".ts", ".tsx"]
+  extensions: [".js", ".json", ".jsx", ".mjs", ".ts", ".tsx"]
 };
 
 function isAmdName(file) {
