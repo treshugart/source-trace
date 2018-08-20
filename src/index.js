@@ -40,13 +40,13 @@ async function stats(path) {
 }
 
 module.exports = async function sourceTrace(file, opts) {
-  opts = { ...conf, ...opts };
+  opts = { ...conf, basedir: process.cwd(), ...opts };
+  const meta = parseMeta(file);
+  file = meta.path;
   const resolved = resolve.sync(file, {
     basedir: opts.basedir,
     extensions: opts.extensions
   });
-  const meta = parseMeta(resolved);
-  file = meta.path;
 
   // Ignore special AMD names.
   if (isAmdName(file)) {

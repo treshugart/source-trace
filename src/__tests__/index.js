@@ -1,4 +1,6 @@
+const path = require("path");
 const trace = require("..");
+
 const numFiles = 2;
 
 test("schema", async () => {
@@ -8,10 +10,10 @@ test("schema", async () => {
       loaders: [],
       originalPath: "./parse-meta",
       path: `./parse-meta`,
-      parent: `${process.cwd()}/src/index.js`,
+      parent: path.join(process.cwd(), "src", "index.js"),
       query: null,
-      resolvedFrom: `${process.cwd()}/src`,
-      resolvedPath: `${process.cwd()}/src/parse-meta.js`
+      resolvedFrom: path.join(process.cwd(), "src"),
+      resolvedPath: path.join(process.cwd(), "src", "parse-meta.js")
     },
     {
       loaders: [{ path: "loader", query: "query" }],
@@ -20,7 +22,7 @@ test("schema", async () => {
       path: `./src`,
       query: "query",
       resolvedFrom: process.cwd(),
-      resolvedPath: `${process.cwd()}/src/index.js`
+      resolvedPath: path.join(process.cwd(), "src", "index.js")
     }
   ]);
 });
