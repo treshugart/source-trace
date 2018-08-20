@@ -7,5 +7,6 @@ module.exports = function parseMeta(originalPath) {
   const parts = originalPath.split("!").filter(Boolean);
   const { path, query } = parsePart(parts.pop());
   const loaders = parts.map(parsePart);
-  return { loaders, originalPath, path, query };
+  const suffix = path.split(".").pop();
+  return { loaders, originalPath, path, query, suffix };
 };

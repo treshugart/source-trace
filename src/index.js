@@ -1,5 +1,5 @@
 const findRoot = require("find-root");
-const fs = require("fs");
+const fs = require("fs-extra");
 const path = require("path");
 const precinct = require("precinct");
 const resolve = require("resolve");
@@ -11,25 +11,47 @@ const conf = {
   extensions: [".js", ".json", ".jsx", ".mjs", ".ts", ".tsx"]
 };
 
+function getDeps(file) {
+  // Precinct uses the typescript-eslint-parser and it emits a wanring if used
+  // on a TS source version that isn't explicitly supported by them. For that
+  // reason, we have to suppress logging by it.
+  const oldConsoleLog = console.log;
+  console.log = () => {};
+  const deps = precinct.paperwork(file);
+  console.log = oldConsoleLog;
+  return deps;
+}
+
 function isAmdName(file) {
   return file === "exports" || file === "module";
 }
 
 function isModule(file) {
   const [first] = file;
-  return first !== "." && first !== "/";
+  return first !== "." && first !== "/" && !file.match(/^[a-zA-Z]:/);
 }
 
-module.exports = function sourceTrace(file, opts) {
-  const meta = parseMeta(file);
+async function stats(path) {
+  try {
+    return await fs.stat(path);
+  } catch (e) {
+    return null;
+  }
+}
+
+module.exports = async function sourceTrace(file, opts) {
+  opts = { ...conf, ...opts };
+  const resolved = resolve.sync(file, {
+    basedir: opts.basedir,
+    extensions: opts.extensions
+  });
+  const meta = parseMeta(resolved);
   file = meta.path;
 
   // Ignore special AMD names.
   if (isAmdName(file)) {
     return [];
   }
-
-  opts = { ...conf, ...opts };
 
   if (!opts.basedir) {
     opts.basedir = path.resolve(path.dirname(file));
@@ -50,27 +72,25 @@ module.exports = function sourceTrace(file, opts) {
     }
   }
 
-  const resolved = resolve.sync(file, opts);
-
   if (opts.visited[resolved] || isModule(resolved)) {
     return [];
   }
 
   opts.visited[resolved] = true;
 
-  const contents = fs.readFileSync(resolved).toString();
-  const immediateDeps = precinct(contents);
+  const immediateDeps = getDeps(resolved);
   const tracedDeps = [];
 
+  // Depth-first means children come first.
   for (const immediateDep of immediateDeps) {
-    tracedDeps.push(
-      ...sourceTrace(immediateDep, {
-        ...opts,
-        ...{ basedir: path.dirname(resolved) }
-      }).map(d => ({ ...d, parent: resolved }))
-    );
+    const childDeps = await sourceTrace(immediateDep.replace(/\.js$/, ""), {
+      ...opts,
+      ...{ basedir: path.dirname(resolved) }
+    });
+    tracedDeps.push(...childDeps.map(d => ({ ...d, parent: resolved })));
   }
 
+  // Depth-first means parent comes after the children.
   tracedDeps.push({
     ...meta,
     parent: null,

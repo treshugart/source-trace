@@ -1,31 +1,18 @@
 {
   "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-preset-env": "^1.6.0",
-    "babel-preset-es2016": "^6.24.1",
-    "babel-preset-es2017": "^6.24.1",
-    "babel-preset-flow": "^6.23.0",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-0": "^6.24.1",
-    "babel-jest": "^22.0.3",
-    "jest": "^23.2.0",
-    "conartist": "^0.15.1"
+    "jest": "^23.2.0"
   },
-  "files": [
-    "node/"
-  ],
-  "main": "./node/index.js",
+  "main": "./src/index.js",
   "scripts": {
-    "build:node": "BABEL_ENV=node babel src --out-dir node",
-    "test": "jest",
-    "prepublish": "npm run build:node"
+    "test": "jest"
   },
   "name": "source-trace",
   "version": "4.2.1",
   "description": "Trace all of your dependencies for any type of JavaScript (and supersets - TS / Flow) source files.",
   "dependencies": {
     "find-root": "^1.1.0",
-    "precinct": "^3.8.0",
+    "fs-extra": "^7.0.0",
+    "precinct": "^4.2.0",
     "resolve": "^1.4.0",
     "yargs": "^8.0.2"
   },
@@ -34,5 +21,5 @@
     "email": "treshugart@gmail.com"
   },
   "license": "MIT",
-  "bin": "./node/bin/index.js"
+  "bin": "./src/bin/index.js"
 }
