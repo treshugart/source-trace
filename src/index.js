@@ -96,7 +96,8 @@ module.exports = async function sourceTrace(file, opts) {
     parent: null,
     path: file,
     resolvedFrom: opts.basedir,
-    resolvedPath: resolved
+    resolvedPath: resolved,
+    suffix: resolved.split(".").pop()
   });
 
   return tracedDeps;

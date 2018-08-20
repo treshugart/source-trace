@@ -5,8 +5,7 @@ test("data", () => {
     loaders: [],
     originalPath: "module/test.js",
     path: "module/test.js",
-    query: null,
-    suffix: "js"
+    query: null
   });
   expect(
     parseMeta("!name1?data1!name2?data2=something!./path/test.js?query")
@@ -17,7 +16,6 @@ test("data", () => {
     ],
     originalPath: "!name1?data1!name2?data2=something!./path/test.js?query",
     path: "./path/test.js",
-    query: "query",
-    suffix: "js"
+    query: "query"
   });
 });
