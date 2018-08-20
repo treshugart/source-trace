@@ -40,7 +40,7 @@ The returned data doesn't just return a path. It also returns other information 
   path: 'some/file.js',
   query: 'another-query',
   resolvedFrom: '/path/to/cwd',
-  resolvedPath: '/path/to/cwd/some/file.js
+  resolvedPath: '/path/to/cwd/some/file.js'
 }
 ```
 
