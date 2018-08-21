@@ -8,6 +8,7 @@ const parseMeta = require("./parse-meta");
 const defs = {
   basedir: null,
   extensions: [".js", ".json", ".jsx", ".mjs", ".ts", ".tsx"],
+  mains: ["main", "module"],
   ignore({ path }) {
     return isAmdName(path) || isModuleName(path);
   },
@@ -31,7 +32,10 @@ function isAmdName(file) {
 
 function isModuleName(file) {
   const [first] = file;
-  return first !== "." && first !== "/" && !file.match(/^[a-zA-Z]:/);
+  return (
+    first === "@" ||
+    (first !== "." && first !== "/" && !file.match(/^[a-zA-Z]:/))
+  );
 }
 
 async function trace(file, opts) {
@@ -44,16 +48,51 @@ async function trace(file, opts) {
     return [];
   }
 
+  // Attempt to resolve the path.
   const resolved = resolve.sync(file, {
     basedir: opts.basedir,
-    extensions: opts.extensions
+    extensions: opts.extensions,
+    packageFilter(pkg, dir) {
+      return {
+        ...pkg,
+        main: opts.mains.reduce((prev, next) => {
+          return next in pkg ? pkg[next] : prev;
+        }, pkg.main)
+      };
+    }
   });
-  const traced = [];
+
+  // If the path still cannot be resolved, it's a built in.
+  if (isModuleName(resolved)) {
+    return [];
+  }
+
+  console.log(resolved);
+
+  // We also record the visited files so we have a pointer back to them in case
+  // we need to update its metadata later on.
+  if (opts.visited[resolved]) {
+    opts.visited[resolved].parents.push(opts.parent);
+    return [];
+  } else {
+    opts.visited[resolved] = {
+      ...meta,
+      parents: opts.parent ? [opts.parent] : [],
+      path: file,
+      resolvedFrom: opts.basedir,
+      resolvedPath: resolved,
+      suffix: resolved.split(".").pop()
+    };
+  }
 
   // Depth-first means children come first.
+  const traced = [];
   for (const immediateDep of getDependencyPaths(resolved)) {
+    const formattedName = isModuleName(immediateDep)
+      ? immediateDep
+      : immediateDep.replace(/\.js$/, "");
     traced.push(
-      ...(await trace(immediateDep.replace(/\.js$/, ""), {
+      ...(await trace(formattedName, {
         ...opts,
         ...{
           basedir: path.dirname(resolved),
@@ -64,22 +103,7 @@ async function trace(file, opts) {
   }
 
   // Depth-first means parent comes after the children.
-  //
-  // We also record the visited files so we have a pointer back to them in case
-  // we need to update its metadata later on.
-  if (opts.visited[resolved]) {
-    opts.visited[resolved].parents.push(opts.parent);
-  } else {
-    opts.visited[resolved] = {
-      ...meta,
-      parents: opts.parent ? [opts.parent] : [],
-      path: file,
-      resolvedFrom: opts.basedir,
-      resolvedPath: resolved,
-      suffix: resolved.split(".").pop()
-    };
-    traced.push(opts.visited[resolved]);
-  }
+  traced.push(opts.visited[resolved]);
 
   return traced;
 }
