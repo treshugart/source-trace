@@ -5,10 +5,13 @@ const precinct = require("precinct");
 const resolve = require("resolve");
 const parseMeta = require("./parse-meta");
 
-const conf = {
+const defs = {
   basedir: null,
-  ignore: isModule,
-  extensions: [".js", ".json", ".jsx", ".mjs", ".ts", ".tsx"]
+  extensions: [".js", ".json", ".jsx", ".mjs", ".ts", ".tsx"],
+  ignore({ path }) {
+    return isAmdName(path) || isModuleName(path);
+  },
+  parent: null
 };
 
 function getDeps(file) {
@@ -26,79 +29,64 @@ function isAmdName(file) {
   return file === "exports" || file === "module";
 }
 
-function isModule(file) {
+function isModuleName(file) {
   const [first] = file;
   return first !== "." && first !== "/" && !file.match(/^[a-zA-Z]:/);
 }
 
-async function stats(path) {
-  try {
-    return await fs.stat(path);
-  } catch (e) {
-    return null;
-  }
-}
-
-module.exports = async function sourceTrace(file, opts) {
-  opts = { ...conf, basedir: process.cwd(), ...opts };
+async function trace(file, opts) {
+  opts = { ...defs, basedir: process.cwd(), visited: {}, ...opts };
   const meta = parseMeta(file);
   file = meta.path;
+
+  // Ignore check.
+  if (opts.ignore(meta)) {
+    return [];
+  }
+
   const resolved = resolve.sync(file, {
     basedir: opts.basedir,
     extensions: opts.extensions
   });
-
-  // Ignore special AMD names.
-  if (isAmdName(file)) {
-    return [];
-  }
-
-  if (!opts.basedir) {
-    opts.basedir = path.resolve(path.dirname(file));
-    file = `./${path.basename(file)}`;
-  }
-
-  // So the instance isn't shared.
-  if (!opts.visited) {
-    opts.visited = {};
-  }
-
-  if (opts.ignore) {
-    if (
-      (typeof opts.ignore === "function" && opts.ignore(file, opts)) ||
-      (opts.ignore.indexOf && opts.ignore.indexOf(file) > -1)
-    ) {
-      return [];
-    }
-  }
-
-  if (opts.visited[resolved] || isModule(resolved)) {
-    return [];
-  }
-
-  opts.visited[resolved] = true;
-
-  const immediateDeps = getDeps(resolved);
-  const tracedDeps = [];
+  const traced = [];
 
   // Depth-first means children come first.
-  for (const immediateDep of immediateDeps) {
-    const childDeps = await sourceTrace(immediateDep.replace(/\.js$/, ""), {
-      ...opts,
-      ...{ basedir: path.dirname(resolved) }
-    });
-    tracedDeps.push(...childDeps.map(d => ({ ...d, parent: resolved })));
+  for (const immediateDep of getDeps(resolved)) {
+    traced.push(
+      ...(await trace(immediateDep.replace(/\.js$/, ""), {
+        ...opts,
+        ...{
+          basedir: path.dirname(resolved),
+          parent: resolved
+        }
+      }))
+    );
   }
 
   // Depth-first means parent comes after the children.
-  tracedDeps.push({
-    ...meta,
-    parent: null,
-    path: file,
-    resolvedFrom: opts.basedir,
-    resolvedPath: resolved,
-    suffix: resolved.split(".").pop()
-  });
+  //
+  // We also record the visited files so we have a pointer back to them in case
+  // we need to update its metadata later on.
+  if (opts.visited[resolved]) {
+    opts.visited[resolved].parents.push(opts.parent);
+  } else {
+    opts.visited[resolved] = {
+      ...meta,
+      parents: opts.parent ? [opts.parent] : [],
+      path: file,
+      resolvedFrom: opts.basedir,
+      resolvedPath: resolved,
+      suffix: resolved.split(".").pop()
+    };
+    traced.push(opts.visited[resolved]);
+  }
 
-  return tracedDeps;
+  return traced;
+}
+
+module.exports = {
+  isAmdName,
+  isModuleName,
+  getDeps,
+  trace
 };

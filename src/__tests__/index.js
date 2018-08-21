@@ -1,5 +1,5 @@
 const path = require("path");
-const trace = require("..");
+const { trace } = require("..");
 
 const numFiles = 2;
 
@@ -10,7 +10,7 @@ test("schema", async () => {
       loaders: [],
       originalPath: "./parse-meta",
       path: `./parse-meta`,
-      parent: path.join(process.cwd(), "src", "index.js"),
+      parents: [path.join(process.cwd(), "src", "index.js")],
       query: null,
       resolvedFrom: path.join(process.cwd(), "src"),
       resolvedPath: path.join(process.cwd(), "src", "parse-meta.js")
@@ -18,7 +18,7 @@ test("schema", async () => {
     {
       loaders: [{ path: "loader", query: "query" }],
       originalPath: "!loader?query!./src?query",
-      parent: null,
+      parents: [],
       path: `./src`,
       query: "query",
       resolvedFrom: process.cwd(),
@@ -27,7 +27,7 @@ test("schema", async () => {
   ]);
 });
 
-test("defaults (should ignore deps)", async () => {
+test("ignore default", async () => {
   const deps = await trace("./src");
   expect(deps.length).toBe(numFiles);
 });
@@ -37,7 +37,8 @@ test("ignore everything", async () => {
   expect(deps.length).toBe(0);
 });
 
-test("ignore nothing", async () => {
-  const deps = await trace("./src", { ignore: () => false });
-  expect(deps.length).toBeGreaterThan(numFiles);
+test("project", async () => {
+  const deps = await trace("./src/__fixtures__");
+  expect(deps.length).toBe(4);
+  expect(deps[0].parents.length).toBe(2);
 });
