@@ -14,7 +14,7 @@ const defs = {
   parent: null
 };
 
-function getDeps(file) {
+function getDependencyPaths(file) {
   // Precinct uses the typescript-eslint-parser and it emits a wanring if used
   // on a TS source version that isn't explicitly supported by them. For that
   // reason, we have to suppress logging by it.
@@ -51,7 +51,7 @@ async function trace(file, opts) {
   const traced = [];
 
   // Depth-first means children come first.
-  for (const immediateDep of getDeps(resolved)) {
+  for (const immediateDep of getDependencyPaths(resolved)) {
     traced.push(
       ...(await trace(immediateDep.replace(/\.js$/, ""), {
         ...opts,
@@ -87,6 +87,6 @@ async function trace(file, opts) {
 module.exports = {
   isAmdName,
   isModuleName,
-  getDeps,
+  getDependencyPaths,
   trace
 };
