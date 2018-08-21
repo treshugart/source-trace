@@ -67,8 +67,6 @@ async function trace(file, opts) {
     return [];
   }
 
-  console.log(resolved);
-
   // We also record the visited files so we have a pointer back to them in case
   // we need to update its metadata later on.
   if (opts.visited[resolved]) {
