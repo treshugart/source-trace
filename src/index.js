@@ -8,10 +8,10 @@ const parseMeta = require("./parse-meta");
 const defs = {
   basedir: null,
   extensions: [".js", ".json", ".jsx", ".mjs", ".ts", ".tsx"],
-  mains: ["main", "module"],
-  ignore({ path }) {
-    return isAmdName(path) || isModuleName(path);
+  ignore() {
+    return true;
   },
+  mains: ["main", "module"],
   parent: null
 };
 
@@ -24,10 +24,6 @@ function getDependencyPaths(file) {
   const deps = precinct.paperwork(file);
   console.log = oldConsoleLog;
   return deps;
-}
-
-function isAmdName(file) {
-  return file === "exports" || file === "module";
 }
 
 function isModuleName(file) {
