@@ -9,14 +9,14 @@ const defs = {
   basedir: null,
   extensions: [".js", ".json", ".jsx", ".mjs", ".ts", ".tsx"],
   ignore() {
-    return true;
+    return false;
   },
   mains: ["main", "module"],
   parent: null
 };
 
-function getDependencyPaths(file) {
-  // Precinct uses the typescript-eslint-parser and it emits a wanring if used
+function list(file) {
+  // Precinct uses the typescript-eslint-parser and it emits a warning if used
   // on a TS source version that isn't explicitly supported by them. For that
   // reason, we have to suppress logging by it.
   const oldConsoleLog = console.log;
@@ -81,7 +81,7 @@ async function trace(file, opts) {
 
   // Depth-first means children come first.
   const traced = [];
-  for (const immediateDep of getDependencyPaths(resolved)) {
+  for (const immediateDep of list(resolved)) {
     const formattedName = isModuleName(immediateDep)
       ? immediateDep
       : immediateDep.replace(/\.js$/, "");
@@ -103,8 +103,6 @@ async function trace(file, opts) {
 }
 
 module.exports = {
-  isAmdName,
-  isModuleName,
-  getDependencyPaths,
+  list,
   trace
 };
