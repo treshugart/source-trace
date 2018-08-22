@@ -7,7 +7,7 @@
     "test": "jest"
   },
   "name": "source-trace",
-  "version": "5.1.0",
+  "version": "6.0.0",
   "description": "Trace all of your dependencies for any type of JavaScript (and supersets - TS / Flow) source files.",
   "dependencies": {
     "find-root": "^1.1.0",
