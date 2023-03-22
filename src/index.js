@@ -1,18 +1,17 @@
-const findRoot = require("find-root");
-const fs = require("fs-extra");
 const path = require("path");
 const precinct = require("precinct");
 const resolve = require("resolve");
 const parseMeta = require("./parse-meta");
 
 const defs = {
-  basedir: null,
-  extensions: [".js", ".json", ".jsx", ".mjs", ".ts", ".tsx"],
-  ignore() {
-    return false;
-  },
-  mains: ["main", "module"],
-  parent: null
+  basedir: process.cwd(),
+  cwd: process.cwd(),
+  extensions: [".js", ".json", ".jsx", ".mjs", ".ts", ".tsx", ".d.ts"],
+  ignore: () => false,
+  ignoreNodeModules: true,
+  mains: ["src", "module", "main", "types"],
+  parent: "",
+  resolve: (file) => file,
 };
 
 function list(file) {
@@ -21,7 +20,9 @@ function list(file) {
   // reason, we have to suppress logging by it.
   const oldConsoleLog = console.log;
   console.log = () => {};
-  const deps = precinct.paperwork(file);
+  const deps = precinct.paperwork(file, {
+    includeCore: false,
+  });
   console.log = oldConsoleLog;
   return deps;
 }
@@ -34,48 +35,53 @@ function isModuleName(file) {
   );
 }
 
-async function trace(file, opts) {
-  opts = { ...defs, basedir: process.cwd(), visited: {}, ...opts };
+async function trace(file, opts, visited = {}) {
+  opts = { ...defs, ...opts };
   const meta = parseMeta(file);
   file = meta.path;
 
   // Ignore check.
-  if (opts.ignore(meta)) {
+  if (await opts.ignore(meta, opts)) {
     return [];
   }
 
   // Attempt to resolve the path.
-  const resolved = resolve.sync(file, {
-    basedir: opts.basedir,
-    extensions: opts.extensions,
-    packageFilter(pkg, dir) {
-      return {
+  let resolved;
+  try {
+    resolved = resolve.sync(await opts.resolve(file, opts), {
+      basedir: opts.basedir,
+      extensions: opts.extensions,
+      packageFilter: (pkg) => ({
         ...pkg,
-        main: opts.mains.reduce((prev, next) => {
-          return next in pkg ? pkg[next] : prev;
-        }, pkg.main)
-      };
-    }
-  });
+        main: pkg[opts.mains.find((main) => pkg[main])],
+      }),
+    });
+  } catch (e) {
+    // This is a more helpful error because node-resolve will tell you the
+    // basedir the file was being resolved from, but not the file.
+    throw new Error(
+      `Could not resolve ${file} from ${opts.parent || opts.basedir}`
+    );
+  }
 
-  // If the path still cannot be resolved, it's a built in.
-  if (isModuleName(resolved)) {
+  if (opts.ignoreNodeModules && resolved.includes("/node_modules/")) {
     return [];
   }
 
   // We also record the visited files so we have a pointer back to them in case
   // we need to update its metadata later on.
-  if (opts.visited[resolved]) {
-    opts.visited[resolved].parents.push(opts.parent);
+  if (visited[resolved]) {
+    visited[resolved].parents.push(opts.parent);
     return [];
   } else {
-    opts.visited[resolved] = {
+    visited[resolved] = {
       ...meta,
+      absolutePath: resolved,
       parents: opts.parent ? [opts.parent] : [],
       path: file,
+      relativePath: path.relative(opts.cwd, resolved),
       resolvedFrom: opts.basedir,
-      resolvedPath: resolved,
-      suffix: resolved.split(".").pop()
+      suffix: resolved.split(".").pop(),
     };
   }
 
@@ -86,23 +92,27 @@ async function trace(file, opts) {
       ? immediateDep
       : immediateDep.replace(/\.js$/, "");
     traced.push(
-      ...(await trace(formattedName, {
-        ...opts,
-        ...{
-          basedir: path.dirname(resolved),
-          parent: resolved
-        }
-      }))
+      ...(await trace(
+        formattedName,
+        {
+          ...opts,
+          ...{
+            basedir: path.dirname(resolved),
+            parent: resolved,
+          },
+        },
+        visited
+      ))
     );
   }
 
   // Depth-first means parent comes after the children.
-  traced.push(opts.visited[resolved]);
+  traced.push(visited[resolved]);
 
   return traced;
 }
 
 module.exports = {
   list,
-  trace
+  trace,
 };
