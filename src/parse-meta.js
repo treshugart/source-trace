@@ -1,11 +1,22 @@
+const cache = {};
+
 function parsePart(part) {
-  const [path, query = null] = part.split("?");
-  return { path, query };
+  const [file, query = null] = part.split("?");
+  return { file, query };
 }
 
-module.exports = function parseMeta(originalPath) {
-  const parts = originalPath.split("!").filter(Boolean);
-  const { path, query } = parsePart(parts.pop());
+module.exports = function parseMeta(spec) {
+  if (cache[spec]) {
+    return cache[spec];
+  }
+  const parts = spec.split("!").filter(Boolean);
+  const { file, query } = parsePart(parts.pop());
   const loaders = parts.map(parsePart);
-  return { loaders, originalPath, path, query };
+  return (cache[spec] = {
+    loaders,
+    file,
+    query,
+    spec,
+    suffix: file.split(".").pop(),
+  });
 };
