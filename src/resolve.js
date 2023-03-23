@@ -2,19 +2,21 @@ const nodeResolve = require("resolve");
 
 const cache = {};
 
-module.exports = async (meta, opts) => {
+module.exports = async function resolve(meta, opts) {
   const key = meta.file + opts.basedir;
 
   if (cache[key]) {
     return cache[key];
   }
 
-  if (await opts.ignore(meta, opts)) {
+  const file = await opts.resolve(meta, opts);
+
+  if (!file) {
     return;
   }
 
   try {
-    cache[key] = nodeResolve.sync(await opts.resolve(meta, opts), {
+    cache[key] = nodeResolve.sync(file, {
       basedir: opts.basedir,
       extensions: opts.extensions,
       packageFilter: (pkg) => ({
