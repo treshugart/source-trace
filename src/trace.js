@@ -15,8 +15,9 @@ const defs = {
   resolve: (file) => file,
 };
 
-const circularCache = {};
-const traceCache = {};
+const cacheCircular = {};
+const cacheTrace = {};
+const symChildren = Symbol("children");
 
 module.exports = async function trace(files, opts, stack = [], depth = 0) {
   opts = { ...defs, ...opts };
@@ -35,26 +36,29 @@ module.exports = async function trace(files, opts, stack = [], depth = 0) {
       }
 
       if (stack.includes(file)) {
-        circularCache[file] = true;
+        cacheCircular[file] = true;
       }
 
-      const isTraced = !!traceCache[file];
-      traceCache[file] = true;
+      const isTraced = !!cacheTrace[file];
+      cacheTrace[file] = true;
       const fileObj = {
         get children() {
-          if (!this._children) {
-            this._children = trace(
+          if (!this[symChildren]) {
+            this[symChildren] = trace(
               this.dependencies,
               {
                 ...opts,
-                basedir: path.dirname(file),
+                basedir: path.dirname(this.absolutePath),
                 parent: this,
               },
-              stack.concat(file),
+              stack.concat(this.absolutePath),
               depth + 1
             );
           }
-          return this._children;
+          return this[symChildren];
+        },
+        get dependencies() {
+          return dependencies(this.absolutePath);
         },
         get index() {
           return this.siblings?.then((c) => c.indexOf(this));
@@ -70,9 +74,8 @@ module.exports = async function trace(files, opts, stack = [], depth = 0) {
         },
         absolutePath: file,
         basedir: opts.basedir,
-        dependencies: dependencies(file),
         depth,
-        isCircular: !!circularCache[file],
+        isCircular: !!cacheCircular[file],
         isTraced,
         meta,
         parent: opts.parent,
